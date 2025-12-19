@@ -1,0 +1,39 @@
+{
+  "model_config": {
+    "architecture": "ResNet18",
+    "num_classes": 2,
+    "input_channels": 1,
+    "input_shape": [
+      63,
+      53
+    ]
+  },
+  "spec_config": {
+    "rate": "4000 Hz",
+    "window": "0.06 s",
+    "step": "0.008 s",
+    "freq_min": "0 Hz",
+    "freq_max": "800 Hz",
+    "window_func": "hann",
+    "duration": "0.5 s",
+    "type": "MagSpectrogram",
+    "denoiser": [
+      {
+        "name": "median_equalizer",
+        "window_duration_sec": 3
+      }
+    ]
+  },
+  "training_config": {
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "num_epochs": 50,
+    "optimizer": "Adam",
+    "loss_function": "CrossEntropyLoss"
+  },
+  "normalization": {
+    "enabled": true,
+    "mean": 2.5575003623962402,
+    "std": 4.222128868103027
+  }
+}

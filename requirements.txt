@@ -1,0 +1,15 @@
+# PyTorch and torchvision - use compatible versions
+# For CUDA 12.8 support, install separately:
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+# OR for latest stable version:
+# pip install torch torchvision
+torch>=2.0.0
+torchvision>=0.15.0
+h5py>=3.8.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+tqdm>=4.65.0
+pandas>=2.0.0
+librosa>=0.10.0
+soundfile>=0.12.0
+tables>=3.8.0
