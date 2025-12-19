@@ -74,7 +74,7 @@ python train.py \
 
 ### 2. Inference on Continuous Recordings
 
-Process audio files and detect haddock calls. **No need to specify config** - everything is loaded from the model:
+Process audio files and detect haddock calls. 
 
 ```bash
 python inference.py \
@@ -102,20 +102,6 @@ python inference.py \
 - `--save_raven`: Save detections in Raven format (.txt) - one file per audio file (optional)
 - `--save_netcdf`: Save detections in NetCDF format (.nc) - one file per audio file (optional)
 
-**Note:** `--spec_config` is **NOT** needed for inference - all parameters are loaded from the model checkpoint automatically!
-
-**Inference Process:**
-1. Loads model and **all configuration** from checkpoint
-2. Prints complete configuration to console
-3. Saves configuration to `model_config.json` for reference
-4. Audio is resampled to target rate using the saved config
-5. Spectrograms calculated with saved parameters + denoising
-6. **Automatic sanity checks** ensure dimensions match training
-7. Model inference on sliding windows
-8. Detections merged based on temporal proximity
-9. **Classification window duration added to detection end times** for accurate call boundaries
-10. Results saved in requested formats (CSV, Raven, NetCDF, plots)
-
 **Output:**
 - `model_config.json`: Complete model configuration for reference
 - **Per-file outputs** (optional, based on flags):
@@ -123,8 +109,6 @@ python inference.py \
   - `audiofile.txt`: Raven selection table format (if `--save_raven`)
   - `audiofile.nc`: NetCDF annotation format (if `--save_netcdf`)
   - `audiofile_predictions.png`: Time series plot of predictions and confidences (if `--save_plots`)
-
-**Note:** Detection `end_time` values include the classification window duration, ensuring the full call extent is captured.
 
 ## Model Architecture
 
@@ -135,51 +119,6 @@ python inference.py \
   - First conv layer: 3 channels → 1 channel
   - Final FC layer: adapted for 2 classes
   - Trained from scratch (no ImageNet pretrained weights)
-
-## Configuration Management
-
-The training script embeds **all configuration parameters** into the model checkpoint:
-
-```json
-{
-  "model_config": {
-    "architecture": "ResNet18",
-    "num_classes": 2,
-    "input_channels": 1,
-    "input_shape": [freq_bins, time_bins]
-  },
-  "spec_config": {
-    "rate": "4000 Hz",
-    "window": "0.064 s",
-    "step": "0.01 s",
-    ...
-  },
-  "normalization": {
-    "enabled": true,
-    "mean": 123.45,
-    "std": 67.89
-  },
-  "training_config": {
-    "batch_size": 32,
-    "learning_rate": 0.001,
-    ...
-  }
-}
-```
-
-**Benefits:**
-- **No parameter mismatches**: Inference always uses correct config
-- **Self-documenting**: Model file contains complete provenance
-- **Reproducible**: All parameters needed to recreate results
-- **Foolproof**: Can't accidentally use wrong spectrogram settings
-
-## Data Normalization
-
-The training script supports data normalization (enabled with `--normalize`):
-- Mean and standard deviation computed from training split
-- Statistics saved in model checkpoint automatically
-- During inference, normalization applied automatically
-- Improves model generalization and stability
 
 ## Spectrogram Configuration
 
@@ -265,7 +204,6 @@ The inference script performs automatic sanity checks:
 - Inference loads config from checkpoint - no manual config needed
 - Normalization is automatic if enabled during training
 - Training plot updates after each epoch
-- Learning rate scheduler reduces LR when validation loss plateaus
 - Best model saved based on validation loss
 
 ## Switching to ResNet50
@@ -276,25 +214,3 @@ To use ResNet50 instead of ResNet18, simply modify `model.py:10`:
 from torchvision.models import resnet50  # Change from resnet18
 model = resnet50(pretrained=pretrained)  # Change from resnet18
 ```
-
-No other changes needed! The configuration will automatically save "ResNet50" as the architecture name.
-
-## Troubleshooting
-
-**"Model checkpoint does not contain metadata" error:**
-- Your model was trained with the old version of train.py
-- Retrain the model with the updated train.py script
-- New checkpoints will include all configuration
-
-**Dimension mismatch during inference:**
-- The audio files have different characteristics than training data
-- Check the model_config.json saved during inference
-- Verify the spectrogram parameters match your training data
-- Ensure audio files have sufficient duration
-
-## Future Enhancements
-
-- Add data augmentation support in `dataset.py`
-- Experiment with different confidence thresholds
-- Add visualization of detections overlaid on spectrograms
-- Support for multi-class classification (>2 classes)
